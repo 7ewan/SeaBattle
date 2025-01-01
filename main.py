@@ -43,7 +43,7 @@ class Board:
         self.on_click(cell)
 
 
-size = width, height = 1600, 1000
+size = width, height = 1200, 800
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
