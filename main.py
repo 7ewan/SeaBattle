@@ -48,10 +48,10 @@ screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
 board1 = Board(10, 10)
-board1.set_view(20, 20, 70)
+board1.set_view(20, 20, 40)
 
 board2 = Board(10, 10)
-board2.set_view(160 + 10 * 70 + 20, 20, 70)
+board2.set_view(150 + 10 * 40 + 20, 20, 40)
 
 running = True
 while running:
