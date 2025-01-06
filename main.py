@@ -2,9 +2,15 @@ import pygame
 import sys
 import os
 import random
-import sqlite3
 
 pygame.init()
+
+ship_images = {
+    4: pygame.image.load('4XBOAT.png'),
+    3: pygame.image.load('3XBOAT.png'),
+    2: pygame.image.load('2XBOAT.png'),
+    1: pygame.image.load('1XBOAT.png'),
+}
 
 
 class Board:
@@ -24,9 +30,9 @@ class Board:
     def render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
-                pygame.draw.rect(screen, 'white', (
+                pygame.draw.rect(screen, 'black', (
                     (self.left + self.cell_size * x), (self.top + self.cell_size * y), self.cell_size, self.cell_size),
-                                 1)
+                                 2)
 
     def get_cell(self, mouse_pos):
         x, y = mouse_pos
@@ -41,6 +47,22 @@ class Board:
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
         self.on_click(cell)
+
+    def draw_ships(self, screen):
+        y_offset = self.top + self.height * self.cell_size + 10
+
+        screen.blit(ship_images[4], (self.left, y_offset))
+
+        for i in range(2):
+            screen.blit(ship_images[3], (self.left + (i + 1) * (ship_images[3].get_width() + 50), y_offset))
+
+        for i in range(3):
+            screen.blit(ship_images[2], (
+                self.left + (i + 1) * (ship_images[2].get_width() + 10), y_offset + ship_images[3].get_height() + 10))
+
+        for i in range(4):
+            screen.blit(ship_images[1], (self.left + (i + 1) * (ship_images[1].get_width() + 10),
+                                         y_offset + ship_images[3].get_height() + ship_images[2].get_height() + 20))
 
 
 size = width, height = 1200, 800
@@ -62,9 +84,13 @@ while running:
             board1.get_click(event.pos)
             board2.get_click(event.pos)
 
-    screen.fill('black')
+    screen.fill('white')
     board1.render(screen)
     board2.render(screen)
+
+    board1.draw_ships(screen)
+    board2.draw_ships(screen)
+
     pygame.display.flip()
 
 pygame.quit()
