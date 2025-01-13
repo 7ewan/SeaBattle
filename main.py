@@ -4,12 +4,14 @@ import sys
 
 pygame.init()
 
+
 def load_image(name):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     return pygame.image.load(fullname)
+
 
 class Board:
     def __init__(self, width, height):
@@ -56,17 +58,20 @@ class Board:
         else:
             return 0 <= cell_x + size - 1 < self.width and 0 <= cell_y < self.height
 
+
 class Ship(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, size, image_name, vertical=False):
         super().__init__(all_sprites)
         self.image = load_image(image_name)
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=(pos_x, pos_y))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = pos_x
         self.rect.y = pos_y
-        self.size = size  # Количество клеток, занимаемых кораблем
-        self.vertical = vertical  # Ориентация: True — вертикально, False — горизонтально
+        self.size = size
+        self.original_image = self.image
+        self.vertical = vertical
         self.dragging = False
+        self.angle = 0
 
     def start_drag(self, pos):
         if self.rect.collidepoint(pos):
@@ -81,11 +86,11 @@ class Ship(pygame.sprite.Sprite):
 
     def stop_drag(self, board):
         self.dragging = False
-        # Рассчитываем координаты клетки по центру корабля
+
         cell = board.get_cell((self.rect.centerx, self.rect.centery))
         if cell and self.is_valid_position(cell, board):
             cell_x, cell_y = cell
-            # Выравниваем корабль по центру клетки
+
             if self.vertical:
                 self.rect.x = board.left + cell_x * board.cell_size
                 self.rect.y = board.top + cell_y * board.cell_size
@@ -94,7 +99,7 @@ class Ship(pygame.sprite.Sprite):
                 self.rect.y = board.top + cell_y * board.cell_size
 
     def is_valid_position(self, cell, board):
-        # Проверка, помещается ли корабль на доске
+
         cell_x, cell_y = cell
         for i in range(self.size):
             if self.vertical:
@@ -104,6 +109,16 @@ class Ship(pygame.sprite.Sprite):
                 if cell_x + i >= board.width or board.board[cell_y][cell_x + i] != 0:
                     return False
         return True
+
+    def rotate(self):
+        # Поворачиваем корабль на 90 градусов против часовой стрелки
+        self.angle = (self.angle + 90) % 360
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        # Обновляем rect после поворота
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
 
 
 size = width, height = 1000, 600
@@ -115,10 +130,18 @@ board1.set_view(20, 100, 40)
 
 all_sprites = pygame.sprite.Group()
 
-# Создание кораблей
-ship1 = Ship(550, 100, size=1, image_name="1XBOAT.png")
-ship2 = Ship(550, 200, size=2, image_name="2XBOAT.png")
-ship3 = Ship(550, 300, size=3, image_name="3XBOAT.png")
+ship11 = Ship(550, 100, size=1, image_name="1XBOAT.png")
+ship12 = Ship(610, 100, size=1, image_name="1XBOAT.png")
+ship13 = Ship(670, 100, size=1, image_name="1XBOAT.png")
+ship14 = Ship(730, 100, size=1, image_name="1XBOAT.png")
+
+ship21 = Ship(550, 200, size=2, image_name="2XBOAT.png")
+ship22 = Ship(670, 200, size=2, image_name="2XBOAT.png")
+ship23 = Ship(790, 200, size=2, image_name="2XBOAT.png")
+
+ship31 = Ship(550, 300, size=3, image_name="3XBOAT.png")
+ship32 = Ship(730, 300, size=3, image_name="3XBOAT.png")
+
 ship4 = Ship(550, 400, size=4, image_name="4XBOAT.png")
 
 running = True
@@ -145,11 +168,55 @@ while running:
                 dragged_sprite.stop_drag(board1)
                 dragged_sprite = None
 
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_pos = event.pos
+
+
+            if ship11.rect.collidepoint(mouse_pos):
+                ship11.rotate()
+
+            if ship12.rect.collidepoint(mouse_pos):
+                ship12.rotate()
+
+            if ship13.rect.collidepoint(mouse_pos):
+                ship13.rotate()
+
+            if ship14.rect.collidepoint(mouse_pos):
+                ship14.rotate()
+
+            if ship21.rect.collidepoint(mouse_pos):
+                ship21.rotate()
+
+            if ship22.rect.collidepoint(mouse_pos):
+                ship22.rotate()
+
+            if ship23.rect.collidepoint(mouse_pos):
+                ship23.rotate()
+
+            if ship31.rect.collidepoint(mouse_pos):
+                ship31.rotate()
+
+            if ship32.rect.collidepoint(mouse_pos):
+                ship32.rotate()
+
+            if ship4.rect.collidepoint(mouse_pos):
+                ship4.rotate()
+
     screen.fill('white')
     board1.render(screen)
     all_sprites.draw(screen)
     all_sprites.update()
+    ship11.draw(screen)
+    ship12.draw(screen)
+    ship13.draw(screen)
+    ship14.draw(screen)
+    ship21.draw(screen)
+    ship22.draw(screen)
+    ship23.draw(screen)
+    ship31.draw(screen)
+    ship32.draw(screen)
+    ship4.draw(screen)
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(60)
 
 pygame.quit()
