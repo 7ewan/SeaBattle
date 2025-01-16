@@ -2,7 +2,19 @@ import pygame
 import os
 import sys
 
+from pygame import K_SPACE
+
 pygame.init()
+
+FPS = 50
+size = width, height = 1000, 600
+screen = pygame.display.set_mode(size)
+clock = pygame.time.Clock()
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
 
 
 def load_image(name):
@@ -11,6 +23,36 @@ def load_image(name):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     return pygame.image.load(fullname)
+
+
+def start_screen():
+    intro_text = ["МОРСКОЙ БОЙ",
+                  'НАЖМИТЕ "SPACE" ДЛЯ НАЧАЛА ИГРЫ',]
+
+    fon = pygame.transform.scale(load_image('banner5.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = width / 2 - intro_rect.width / 2
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_SPACE:
+                    return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+start_screen()
 
 
 class Board:
@@ -111,7 +153,6 @@ class Ship(pygame.sprite.Sprite):
         return True
 
     def rotate(self):
-        # Поворачиваем корабль на 90 градусов против часовой стрелки
         self.angle = (self.angle + 90) % 360
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         # Обновляем rect после поворота
@@ -120,10 +161,6 @@ class Ship(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-
-size = width, height = 1000, 600
-screen = pygame.display.set_mode(size)
-clock = pygame.time.Clock()
 
 board1 = Board(10, 10)
 board1.set_view(20, 100, 40)
@@ -171,7 +208,6 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = event.pos
 
-
             if ship11.rect.collidepoint(mouse_pos):
                 ship11.rotate()
 
@@ -216,6 +252,7 @@ while running:
     ship31.draw(screen)
     ship32.draw(screen)
     ship4.draw(screen)
+
     pygame.display.flip()
     clock.tick(60)
 
