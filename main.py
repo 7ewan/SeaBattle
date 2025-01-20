@@ -5,10 +5,16 @@ import sys
 # Инициализация pygame
 pygame.init()
 
+# Задаем размеры игрового окна
+size = width, height = 1000, 600
+screen = pygame.display.set_mode(size)  # Устанавливаем размеры окна
+clock = pygame.time.Clock()  # Устанавливаем таймер для управления обновлением кадров
+
 # Инициализация шрифтов
 pygame.font.init()
 font_board = pygame.font.SysFont('arial', 20)  # Инициализация шрифта для подписи клеток игрового поля
 font_player_window = pygame.font.SysFont('arial', 40)  # Инициализация шрифта для подписи окна игроков
+
 
 # Функция для загрузки изображений из папки 'data'
 def load_image(name):
@@ -18,10 +24,45 @@ def load_image(name):
         sys.exit()  # Если файл отсутствует, завершаем выполнение программы
     return pygame.image.load(fullname)  # Загружаем изображение и возвращаем его
 
+
 # Функция для отрисовки текста на экране с координатами и шрифтом
 def draw_text(screen, text, x, y, font, color='Blue'):
     text_surface = font.render(text, True, pygame.Color(color))  # Создаем поверхность текста
     screen.blit(text_surface, (x, y))  # Отображаем текст на экране
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+def start_screen():
+    intro_text = ["МОРСКОЙ БОЙ",
+                  'НАЖМИТЕ "SPACE" ДЛЯ НАЧАЛА ИГРЫ', ]
+
+    fon = pygame.transform.scale(load_image('banner5.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = width / 2 - intro_rect.width / 2
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(30)
+
+
+start_screen()
+
 
 # Класс для создания игрового поля игроков для расстановки кораблей
 class Board:
@@ -56,9 +97,11 @@ class Board:
         # Добавляем нумерацию клеток и буквы
         for i in range(self.width):
             # Номера клеток сверху
-            draw_text(screen, str(i + 1), self.left + self.cell_size * i + self.cell_size // 3, self.top - 25, font_board)
+            draw_text(screen, str(i + 1), self.left + self.cell_size * i + self.cell_size // 3, self.top - 25,
+                      font_board)
             # Буквы клеток слева
-            draw_text(screen, chr(1040 + i), self.left - 25, self.top + self.cell_size * i + self.cell_size // 3, font_board)
+            draw_text(screen, chr(1040 + i), self.left - 25, self.top + self.cell_size * i + self.cell_size // 3,
+                      font_board)
 
     # Функция для получения координат клетки, на которую нажата мышь
     def get_cell(self, mouse_pos):
@@ -84,6 +127,7 @@ class Board:
             return 0 <= cell_x < self.width and 0 <= cell_y + size - 1 < self.height
         else:
             return 0 <= cell_x + size - 1 < self.width and 0 <= cell_y < self.height
+
 
 # Класс для создания кораблей
 class Ship(pygame.sprite.Sprite):
