@@ -80,6 +80,10 @@ class Board:
         print("\n".join([" ".join(map(str, row)) for row in self.board]))
         print()
 
+    def reset_board(self):
+        self.board = [[0] * self.width for _ in range(self.height)]
+        self.save_board_to_file()
+
     def save_board_to_file(self, file_name="board_state.txt"):
         with open(file_name, 'w') as f:
             for row in self.board:

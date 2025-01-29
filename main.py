@@ -9,6 +9,10 @@ pygame.init()
 
 start_screen()
 
+reset_button_rect = pygame.Rect(800, 550, 150, 50)
+reset_button_color = (200, 0, 0)  # Красная кнопка
+reset_button_font = pygame.font.SysFont(None, 36)
+
 button_rect = pygame.Rect(800, 500, 150, 50)
 button_color = (0, 128, 255)
 button_font = pygame.font.SysFont(None, 36)
@@ -43,6 +47,11 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
+                if reset_button_rect.collidepoint(mouse_pos):  # Кнопка сброса
+                    for ship in ships:
+                        ship.reset_position()
+                    board_player_one.reset_board()
+                    board_player_one.print_board()
                 if button_rect.collidepoint(mouse_pos):
                     fight_mode = True
                 for ship in ships:
@@ -107,19 +116,30 @@ while running:
 
     if fight_mode:
         running = False
-        fight_board = FightBoard(10, 10, 40, 100, 40)
-        fight_board.load_board_state('board_state.txt')
-        fight_board_loop(fight_board)
+        fight_board_one = FightBoard(10, 10, 40, 100, 40)
+        fight_board_two = FightBoard(10, 10, 560, 100, 40)
+        fight_board_one.load_board_state('board_state.txt')
+        fight_board_loop(fight_board_one, fight_board_two)
 
     screen.fill('white')
+
     board_player_one.render(screen)
+
     for ship in ships:
         screen.blit(ship.image, ship.rect)
     ships_sprites.draw(screen)
+    screen.blit(ship1_1.image, ship1_1.rect)
+
+    pygame.draw.rect(screen, reset_button_color, reset_button_rect)
+    reset_button_text = reset_button_font.render("Сброс", True, (255, 255, 255))
+    screen.blit(reset_button_text, (reset_button_rect.x + 40, reset_button_rect.y + 10))
+
     pygame.draw.rect(screen, button_color, button_rect)
     button_text = button_font.render("В бой!", True, (255, 255, 255))
     screen.blit(button_text, (button_rect.x + 30, button_rect.y + 10))
-    screen.blit(ship1_1.image, ship1_1.rect)
+
+
+
     pygame.display.flip()
     clock.tick(FPS)
 

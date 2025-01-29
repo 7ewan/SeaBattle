@@ -14,6 +14,7 @@ class Ship(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)  # Маска для столкновений
         self.rect.x = pos_x  # Позиция по оси X
         self.rect.y = pos_y  # Позиция по оси Y
+        self.initial_position = (pos_x, pos_y)
         self.ship_id = ship_id  # Уникальный идентификатор корабля
         self.orientation = "horizontal"
         self.image_name = image_name
@@ -41,3 +42,8 @@ class Ship(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (bottom_left_x, bottom_left_y)
+
+    def reset_position(self):
+        self.rect.topleft = self.initial_position
+        if self.orientation == "vertical":
+            self.rotate()  # Поворачиваем обратно, если повернут

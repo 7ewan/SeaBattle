@@ -68,7 +68,7 @@ class FightBoard(Board):
         self.on_click(cell)
 
 
-def fight_board_loop(fight_board):
+def fight_board_loop(fight_board_one, fight_board_two):
     running = True
     while running:
         for event in pygame.event.get():
@@ -77,9 +77,11 @@ def fight_board_loop(fight_board):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Левый клик мыши (выстрел)
                     mouse_pos = pygame.mouse.get_pos()
-                    fight_board.get_click(mouse_pos)
+                    fight_board_one.get_click(mouse_pos)
+                    fight_board_two.get_click(mouse_pos)
 
         screen.fill('white')
-        fight_board.render(screen)
+        fight_board_one.render(screen)
+        fight_board_two.render(screen)
         pygame.display.flip()
         clock.tick(FPS)
