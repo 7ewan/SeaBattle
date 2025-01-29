@@ -78,6 +78,7 @@ while running:
                                 continue
                         ship.rotate()
                         board_player_one.place_ship(ship)
+                        board_player_one.save_board_to_file()
                         board_player_one.print_board()
                         break
 
