@@ -2,12 +2,19 @@ import pygame
 from StartScreen import start_screen, terminate, clock, screen, FPS
 from Boards import Board
 from Ships import Ship, ships_sprites
+from FightBoard import FightBoard
+from FightBoard import fight_board_loop
 
 pygame.init()
 
 start_screen()
 
+button_rect = pygame.Rect(800, 500, 150, 50)
+button_color = (0, 128, 255)
+button_font = pygame.font.SysFont(None, 36)
+
 board_player_one = Board(10, 10, 40, 100, 40)
+
 ship1_1 = Ship(550, 220, image_name="1XBOAT.png", ship_id=1, size=1, cell_size=40)
 ship1_2 = Ship(630, 220, image_name="1XBOAT.png", ship_id=2, size=1, cell_size=40)
 ship1_3 = Ship(710, 220, image_name="1XBOAT.png", ship_id=3, size=1, cell_size=40)
@@ -27,14 +34,17 @@ offset_y = 0
 
 running = True
 dragged_sprite = None
+fight_mode = False
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Левый клик мыши
+            if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
+                if button_rect.collidepoint(mouse_pos):
+                    fight_mode = True
                 for ship in ships:
                     if ship.rect.collidepoint(mouse_pos):
                         dragging = ship
@@ -45,23 +55,22 @@ while running:
                 mouse_pos = pygame.mouse.get_pos()
                 for ship in ships:
                     if ship.rect.collidepoint(mouse_pos):
+                        board_player_one.remove_ship(ship)
                         if ship.orientation == "horizontal":
                             if ship.rect.y - (ship.size - 1) * ship.cell_size < board_player_one.top:
-                                print(
-                                    "Недостаточно места для поворота корабля. Верхняя часть выходит за пределы поля.")
+                                print("Не хватает места! Отмена поворота.")
+                                board_player_one.place_ship(ship)
                                 continue
                         elif ship.orientation == "vertical":
                             if ship.rect.x + (
-                                    ship.size - 1) * ship.cell_size > board_player_one.cell_size * board_player_one.width:
-                                print("Недостаточно места для поворота корабля. Правая часть выходит за пределы поля.")
+                                    ship.size - 1) * ship.cell_size > board_player_one.left + board_player_one.width * board_player_one.cell_size:
+                                print("Не хватает места! Отмена поворота.")
+                                board_player_one.place_ship(ship)
                                 continue
                         ship.rotate()
-                        print(
-                            f'{ship.ship_id}: ({ship.rect.x // ship.cell_size}, {((ship.rect.y - board_player_one.top) // ship.cell_size) + 1})')
+                        board_player_one.place_ship(ship)
+                        board_player_one.print_board()
                         break
-
-
-
 
         elif event.type == pygame.MOUSEMOTION:
             if dragging:
@@ -69,48 +78,47 @@ while running:
                 dragging.rect.x = mouse_pos[0] + offset_x
                 dragging.rect.y = mouse_pos[1] + offset_y
 
-
         elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:  # Левый клик мыши
-                if dragging:  # Проверяем, что dragging не None
-                    mouse_pos = pygame.mouse.get_pos()
-                    cell = board_player_one.get_cell(mouse_pos)
-                    if cell:  # Если кликнут на допустимую клетку
-                        cell_x, cell_y = cell
+            if event.button == 1 and dragging:
+                mouse_pos = pygame.mouse.get_pos()
+                cell = board_player_one.get_cell(mouse_pos)
+                if cell:
+                    cell_x, cell_y = cell
+                    board_player_one.remove_ship(dragging)
+                    if dragging.orientation == "horizontal":
+                        if cell_x + dragging.size - 1 < board_player_one.width:
+                            left_bottom_x, left_bottom_y = board_player_one.get_bottom_left_coordinates(cell_x, cell_y)
+                            dragging.rect.x = left_bottom_x
+                            dragging.rect.y = left_bottom_y - board_player_one.cell_size
+                        else:
+                            print("Выходит за границы! Оставляем на месте.")
+                    elif dragging.orientation == "vertical":
+                        if cell_y + dragging.size - 1 < board_player_one.height:
+                            left_bottom_x, left_bottom_y = board_player_one.get_bottom_left_coordinates(cell_x, cell_y)
+                            dragging.rect.x = left_bottom_x
+                            dragging.rect.y = left_bottom_y - board_player_one.cell_size
+                        else:
+                            print("Выходит за границы! Оставляем на месте.")
+                    board_player_one.place_ship(dragging)
+                    board_player_one.print_board()
+                    if dragging:
+                        board_player_one.save_board_to_file()
+                dragging = None
 
-                        # Проверка для горизонтального корабля
-                        if dragging.orientation == "horizontal":
-                            if cell_x + dragging.size - 1 < board_player_one.width:  # Проверяем правую границу
-                                left_bottom_x, left_bottom_y = board_player_one.get_bottom_left_coordinates(cell_x,
-                                                                                                            cell_y)
-                                dragging.rect.x = left_bottom_x
-                                dragging.rect.y = left_bottom_y - board_player_one.cell_size  # Чтобы корабль оказался в верхней части клетки
-                                print(
-                                    f'({dragging.rect.x // 40}, {((dragging.rect.y - board_player_one.top) // 40) + 1})')
-                            else:
-                                print("Корабль выходит за границы доски (горизонтально), возврат на прежнюю позицию.")
-                                dragging.rect.x = dragging.rect.x
-                                dragging.rect.y = dragging.rect.y
-
-
-                        elif dragging.orientation == "vertical":
-                            if cell_y + dragging.size - 1 < board_player_one.height:  # Проверяем нижнюю границу
-                                left_bottom_x, left_bottom_y = board_player_one.get_bottom_left_coordinates(cell_x,
-                                                                                                            cell_y)
-                                dragging.rect.x = left_bottom_x
-                                dragging.rect.y = left_bottom_y - board_player_one.cell_size
-                                print(f'({dragging.rect.x // 40}, {((dragging.rect.y - board_player_one.top) // 40)}')
-                            else:
-                                print("Корабль выходит за границы доски (вертикально), возврат на прежнюю позицию.")
-                                dragging.rect.x = dragging.rect.x
-                                dragging.rect.y = dragging.rect.y
-                    dragging = None
+    if fight_mode:
+        running = False
+        fight_board = FightBoard(10, 10, 40, 100, 40)
+        fight_board.load_board_state('board_state.txt')
+        fight_board_loop(fight_board)
 
     screen.fill('white')
     board_player_one.render(screen)
     for ship in ships:
         screen.blit(ship.image, ship.rect)
     ships_sprites.draw(screen)
+    pygame.draw.rect(screen, button_color, button_rect)
+    button_text = button_font.render("В бой!", True, (255, 255, 255))
+    screen.blit(button_text, (button_rect.x + 30, button_rect.y + 10))
     screen.blit(ship1_1.image, ship1_1.rect)
     pygame.display.flip()
     clock.tick(FPS)

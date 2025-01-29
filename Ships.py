@@ -20,7 +20,6 @@ class Ship(pygame.sprite.Sprite):
 
     def rotate(self):
         bottom_left_x, bottom_left_y = self.rect.bottomleft
-
         if self.orientation == "horizontal":
             self.orientation = "vertical"
             # Заменяем изображение на вертикальное

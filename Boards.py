@@ -10,10 +10,9 @@ class Board:
         self.top = top
         self.cell_size = cell_size
         self.text_color = text_color
-        self.font = pygame.font.SysFont(None, 24)  # Устанавливаем шрифт для текста
+        self.font = pygame.font.SysFont(None, 24)
 
     def render(self, screen):
-        # Рисуем рамку доски
         pygame.draw.rect(screen, 'black',
                          (self.left, self.top, self.cell_size * self.width, self.cell_size * self.height), 3)
 
@@ -59,3 +58,30 @@ class Board:
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
         self.on_click(cell)
+
+    def place_ship(self, ship):
+        cell_x = (ship.rect.x - self.left) // self.cell_size
+        cell_y = (ship.rect.y - self.top) // self.cell_size
+
+        if ship.orientation == "horizontal":
+            for i in range(ship.size):
+                self.board[cell_y][cell_x + i] = ship.ship_id
+        else:
+            for i in range(ship.size):
+                self.board[cell_y + i][cell_x] = ship.ship_id
+
+    def remove_ship(self, ship):
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.board[y][x] == ship.ship_id:
+                    self.board[y][x] = 0
+
+    def print_board(self):
+        print("\n".join([" ".join(map(str, row)) for row in self.board]))
+        print()
+
+    def save_board_to_file(self, file_name="board_state.txt"):
+        with open(file_name, 'w') as f:
+            for row in self.board:
+                f.write(" ".join(map(str, row)) + '\n')  # Разделяем числа пробелом
+
