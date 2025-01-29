@@ -7,7 +7,7 @@ def terminate():
     sys.exit()
 
 
-size = WIDTH, HEIGT = 1000, 600
+size = WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 FPS = 60
@@ -19,7 +19,7 @@ def start_screen():
     intro_text = ["МОРСКОЙ БОЙ",
                   'НАЖМИТЕ "SPACE" ДЛЯ НАЧАЛА ИГРЫ', ]
 
-    fon = pygame.transform.scale(load_image('banner5.jpg'), (WIDTH, HEIGT))
+    fon = pygame.transform.scale(load_image('banner5.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
     text_coord = 50

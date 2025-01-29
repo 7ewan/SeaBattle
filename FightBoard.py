@@ -2,7 +2,7 @@ from Boards import Board
 from StartScreen import terminate
 import pygame
 
-size = WIDTH, HEIGT = 1000, 600
+size = WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode(size)
 pygame.init()
 clock = pygame.time.Clock()
