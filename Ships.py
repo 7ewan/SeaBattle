@@ -44,6 +44,6 @@ class Ship(pygame.sprite.Sprite):
         self.rect.bottomleft = (bottom_left_x, bottom_left_y)
 
     def reset_position(self):
-        self.rect.topleft = self.initial_position
         if self.orientation == "vertical":
             self.rotate()  # Поворачиваем обратно, если повернут
+        self.rect.topleft = self.initial_position
