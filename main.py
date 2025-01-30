@@ -53,7 +53,11 @@ while running:
                     board_player_one.reset_board()
                     board_player_one.print_board()
                 if button_rect.collidepoint(mouse_pos):
-                    fight_mode = True
+                    all_ships_placed = all(board_player_one.is_ship_on_board(ship) for ship in ships)
+                    if all_ships_placed:
+                        fight_mode = True
+                    else:
+                        print("Не все корабли расставлены! Расставьте все корабли перед началом боя.")
                 for ship in ships:
                     if ship.rect.collidepoint(mouse_pos):
                         dragging = ship

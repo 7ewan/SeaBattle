@@ -80,6 +80,12 @@ class Board:
         print("\n".join([" ".join(map(str, row)) for row in self.board]))
         print()
 
+    def is_ship_on_board(self, ship):
+        board_rect = pygame.Rect(self.left, self.top,
+                                 self.width * self.cell_size,
+                                 self.height * self.cell_size)
+        return board_rect.contains(ship.rect)
+
     def reset_board(self):
         self.board = [[0] * self.width for _ in range(self.height)]
         self.save_board_to_file()
