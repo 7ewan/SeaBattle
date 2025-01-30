@@ -47,7 +47,7 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
-                if reset_button_rect.collidepoint(mouse_pos):  # Кнопка сброса
+                if reset_button_rect.collidepoint(mouse_pos):
                     for ship in ships:
                         ship.reset_position()
                     board_player_one.reset_board()
@@ -66,23 +66,22 @@ while running:
                     if ship.rect.collidepoint(mouse_pos):
                         previous_position = (ship.rect.x, ship.rect.y)
                         board_player_one.remove_ship(ship)
-                        if ship.orientation == "horizontal":
-                            if ship.rect.y - (ship.size - 1) * ship.cell_size < board_player_one.top:
-                                print("Не хватает места! Отмена поворота.")
-                                board_player_one.place_ship(ship)
-                                continue
-                        elif ship.orientation == "vertical":
-                            if ship.rect.x + (
-                                    ship.size - 1) * ship.cell_size > board_player_one.left + board_player_one.width * board_player_one.cell_size:
-                                print("Не хватает места! Отмена поворота.")
-                                board_player_one.place_ship(ship)
-                                continue
+                        if ship.orientation == "horizontal" and ship.rect.y - (
+                                ship.size - 1) * ship.cell_size < board_player_one.top:
+                            print("Не хватает места! Отмена поворота.")
+                            board_player_one.place_ship(ship)
+                            continue
+                        elif ship.orientation == "vertical" and ship.rect.x + (
+                                ship.size - 1) * ship.cell_size > board_player_one.left + board_player_one.width * board_player_one.cell_size:
+                            print("Не хватает места! Отмена поворота.")
+                            board_player_one.place_ship(ship)
+                            continue
 
                         ship.rotate()
 
-                        if ship.check_collision(ships, board_player_one):
-                            print("Корабль пересекается с другим! Отмена поворота.")
-                            ship.rotate()
+                        if ship.check_adjacent_ships(ships, board_player_one):
+                            print("Корабль слишком близко к другому! Отмена поворота.")
+                            ship.rotate()  # Возвращаем в исходное положение
                             ship.rect.x, ship.rect.y = previous_position
                             board_player_one.place_ship(ship)
                             continue
@@ -90,6 +89,8 @@ while running:
                         board_player_one.place_ship(ship)
                         board_player_one.save_board_to_file()
                         board_player_one.print_board()
+                        break
+
 
 
         elif event.type == pygame.MOUSEMOTION:
@@ -97,6 +98,7 @@ while running:
                 mouse_pos = pygame.mouse.get_pos()
                 dragging.rect.x = mouse_pos[0] + offset_x
                 dragging.rect.y = mouse_pos[1] + offset_y
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and dragging:
@@ -112,6 +114,8 @@ while running:
                             dragging.rect.y = left_bottom_y - board_player_one.cell_size
                         else:
                             print("Выходит за границы! Оставляем на месте.")
+                            dragging.rect.x, dragging.rect.y = dragging.initial_position
+
                     elif dragging.orientation == "vertical":
                         if cell_y + dragging.size - 1 < board_player_one.height:
                             left_bottom_x, left_bottom_y = board_player_one.get_bottom_left_coordinates(cell_x, cell_y)
@@ -119,9 +123,16 @@ while running:
                             dragging.rect.y = left_bottom_y - board_player_one.cell_size
                         else:
                             print("Выходит за границы! Оставляем на месте.")
-                    board_player_one.place_ship(dragging)
-                    board_player_one.print_board()
-                    if dragging:
+                            dragging.rect.x, dragging.rect.y = dragging.initial_position
+
+                    if dragging.check_adjacent_ships(ships, board_player_one):
+                        print("Корабль слишком близко к другому! Оставляем на месте.")
+                        dragging.rect.x, dragging.rect.y = dragging.initial_position
+                        board_player_one.remove_ship(dragging)
+                        board_player_one.print_board()
+                    else:
+                        board_player_one.place_ship(dragging)
+                        board_player_one.print_board()
                         board_player_one.save_board_to_file()
                 dragging = None
 

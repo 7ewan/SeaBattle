@@ -43,11 +43,11 @@ class Ship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (bottom_left_x, bottom_left_y)
 
-    def check_collision(self, ships, board):
+    def check_adjacent_ships(self, ships, board):
         for ship in ships:
-            if ship == self:  # Пропускаем самого себя
+            if ship == self:
                 continue
-            if self.rect.colliderect(ship.rect):  # Если прямоугольники пересекаются
+            if self.rect.colliderect(ship.rect.inflate(self.cell_size * 2, self.cell_size * 2)):
                 return True
         return False
 
