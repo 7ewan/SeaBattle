@@ -64,6 +64,7 @@ while running:
                 mouse_pos = pygame.mouse.get_pos()
                 for ship in ships:
                     if ship.rect.collidepoint(mouse_pos):
+                        previous_position = (ship.rect.x, ship.rect.y)
                         board_player_one.remove_ship(ship)
                         if ship.orientation == "horizontal":
                             if ship.rect.y - (ship.size - 1) * ship.cell_size < board_player_one.top:
@@ -76,11 +77,20 @@ while running:
                                 print("Не хватает места! Отмена поворота.")
                                 board_player_one.place_ship(ship)
                                 continue
+
                         ship.rotate()
+
+                        if ship.check_collision(ships, board_player_one):
+                            print("Корабль пересекается с другим! Отмена поворота.")
+                            ship.rotate()
+                            ship.rect.x, ship.rect.y = previous_position
+                            board_player_one.place_ship(ship)
+                            continue
+
                         board_player_one.place_ship(ship)
                         board_player_one.save_board_to_file()
                         board_player_one.print_board()
-                        break
+
 
         elif event.type == pygame.MOUSEMOTION:
             if dragging:
@@ -138,8 +148,6 @@ while running:
     pygame.draw.rect(screen, button_color, button_rect)
     button_text = button_font.render("В бой!", True, (255, 255, 255))
     screen.blit(button_text, (button_rect.x + 30, button_rect.y + 10))
-
-
 
     pygame.display.flip()
     clock.tick(FPS)
