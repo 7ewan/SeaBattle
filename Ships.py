@@ -16,14 +16,13 @@ class Ship(pygame.sprite.Sprite):
         self.rect.y = pos_y  # Позиция по оси Y
         self.initial_position = (pos_x, pos_y)
         self.ship_id = ship_id  # Уникальный идентификатор корабля
-        self.orientation = "horizontal"
-        self.image_name = image_name
+        self.orientation = "horizontal"  # Начальная ориентация
+        self.image_name = image_name  # Изображение корабля
 
     def rotate(self):
         bottom_left_x, bottom_left_y = self.rect.bottomleft
         if self.orientation == "horizontal":
             self.orientation = "vertical"
-            # Заменяем изображение на вертикальное
             vertical_image_name = self.image_name.replace(".png",
                                                           "v.png")
             self.image = load_image(vertical_image_name)

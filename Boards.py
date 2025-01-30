@@ -16,14 +16,12 @@ class Board:
         pygame.draw.rect(screen, 'black',
                          (self.left, self.top, self.cell_size * self.width, self.cell_size * self.height), 3)
 
-        # Добавляем нумерацию сверху (1–10)
         for x in range(self.width):
             number_text = self.font.render(str(x + 1), True, self.text_color)
             number_x = self.left + x * self.cell_size + self.cell_size // 2 - number_text.get_width() // 2
             number_y = self.top - self.cell_size // 2 - number_text.get_height() // 2
             screen.blit(number_text, (number_x, number_y))
 
-        # Добавляем нумерацию слева (а–к)
         letters = ['а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'к']
         for y in range(self.height):
             letter_text = self.font.render(letters[y], True, self.text_color)
@@ -31,7 +29,6 @@ class Board:
             letter_y = self.top + y * self.cell_size + self.cell_size // 2 - letter_text.get_height() // 2
             screen.blit(letter_text, (letter_x, letter_y))
 
-        # Рисуем клетки доски
         for y in range(self.height):
             for x in range(self.width):
                 pygame.draw.rect(screen, 'black', (
@@ -80,18 +77,17 @@ class Board:
         print("\n".join([" ".join(map(str, row)) for row in self.board]))
         print()
 
+    def reset_board(self, file_name):
+        self.board = [[0] * self.width for _ in range(self.height)]
+        self.save_board_to_file(file_name)
+
     def is_ship_on_board(self, ship):
         board_rect = pygame.Rect(self.left, self.top,
                                  self.width * self.cell_size,
                                  self.height * self.cell_size)
         return board_rect.contains(ship.rect)
 
-    def reset_board(self):
-        self.board = [[0] * self.width for _ in range(self.height)]
-        self.save_board_to_file()
-
-    def save_board_to_file(self, file_name="board_state.txt"):
+    def save_board_to_file(self, file_name):
         with open(file_name, 'w') as f:
             for row in self.board:
-                f.write(" ".join(map(str, row)) + '\n')  # Разделяем числа пробелом
-
+                f.write(" ".join(map(str, row)) + '\n')

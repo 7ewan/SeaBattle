@@ -12,7 +12,7 @@ FPS = 60
 class FightBoard(Board):
     def __init__(self, width, height, left, top, cell_size, text_color='black'):
         super().__init__(width, height, left, top, cell_size, text_color)
-        self.hits = [['0'] * width for _ in range(height)]  # ' ' - пусто, 'X' - попадание, 'x' - промах
+        self.hits = [['0'] * width for _ in range(height)]
         self.font = pygame.font.SysFont(None, 32)
 
     def load_board_state(self, file_name):
