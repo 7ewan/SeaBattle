@@ -2,8 +2,8 @@ import pygame
 from StartScreen import start_screen, terminate, clock, screen, FPS
 from Boards import Board
 from Ships import Ship, ships_sprites
-from FightBoard import FightBoard
-from FightBoard import fight_board_loop
+from FightBoard import FightBoard, fight_board_loop
+from FinishWindow import show_finish_window
 
 pygame.init()
 
@@ -36,7 +36,6 @@ ship3_2 = Ship(710, 380, image_name="3XBOAT.png", ship_id=9, size=3, cell_size=4
 ship4 = Ship(550, 460, image_name="4XBOAT.png", ship_id=10, size=4, cell_size=40)
 
 ships_1 = [ship1_1, ship1_2, ship1_3, ship1_4, ship2_1, ship2_2, ship2_3, ship3_1, ship3_2, ship4]
-
 ships_2 = [ship1_1, ship1_2, ship1_3, ship1_4, ship2_1, ship2_2, ship2_3, ship3_1, ship3_2, ship4]
 
 dragging = None
@@ -124,7 +123,6 @@ while running:
                         board.print_board()
                         break
 
-
         elif event.type == pygame.MOUSEMOTION:
             if dragging:
                 mouse_pos = pygame.mouse.get_pos()
@@ -166,14 +164,14 @@ while running:
 
                 dragging = None
 
-    # **Запуск боя**
     if fight_mode:
         running = False
         fight_board_one = FightBoard(10, 10, 40, 100, 40)
         fight_board_two = FightBoard(10, 10, 560, 100, 40)
         fight_board_one.load_board_state("board_state_1.txt")
         fight_board_two.load_board_state("board_state_2.txt")
-        fight_board_loop(fight_board_one, fight_board_two)
+        winner = fight_board_loop(fight_board_one, fight_board_two)  # Получаем победителя
+        show_finish_window(winner)  # Показываем экран победы
 
     screen.fill("white")
     board.render(screen)

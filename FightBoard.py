@@ -14,6 +14,8 @@ class FightBoard(Board):
         super().__init__(width, height, left, top, cell_size, text_color)
         self.hits = [['0'] * width for _ in range(height)]
         self.font = pygame.font.SysFont(None, 32)
+        self.player1_hits = 0  # Счетчик попаданий Игрока 1
+        self.player2_hits = 0  # Счетчик попаданий Игрока 2
 
     def load_board_state(self, file_name):
         try:
@@ -49,27 +51,42 @@ class FightBoard(Board):
         get_cell_y = (y - self.top) // self.cell_size
         return get_cell_x, get_cell_y
 
-    def register_hit(self, x, y, hit):
-        self.hits[y][x] = 'X' if hit else 'x'
+    def register_hit(self, x, y, hit, player):
+        if hit:
+            self.hits[y][x] = 'X'
+            if player == 1:
+                self.player1_hits += 1  # Увеличиваем счетчик попаданий Игрока 1
+            else:
+                self.player2_hits += 1  # Увеличиваем счетчик попаданий Игрока 2
+        else:
+            self.hits[y][x] = 'x'
 
-    def on_click(self, cell_coords):
+    def on_click(self, cell_coords, player):
         if cell_coords:
             x, y = cell_coords
-            print(f'Выстрел в клетку: ({x}, {y})')
+            print(f'Игрок {player} выстрел в клетку: ({x}, {y})')
             hit = isinstance(self.board[y][x], int) and self.board[y][x] > 0
-            self.register_hit(x, y, hit)
+            self.register_hit(x, y, hit, player)
             if hit:
                 print("Попадание! (X)")
             else:
                 print("Промах (x)")
 
-    def get_click(self, mouse_pos):
+    def get_click(self, mouse_pos, player):
         cell = self.get_cell(mouse_pos)
-        self.on_click(cell)
+        self.on_click(cell, player)
+
+    def check_win(self):
+        if self.player1_hits >= 20:
+            return 1  # Победил Игрок 1
+        elif self.player2_hits >= 20:
+            return 2  # Победил Игрок 2
+        return 0  # Победителя пока нет
 
 
 def fight_board_loop(fight_board_one, fight_board_two):
     running = True
+    current_player = 1  # Начинает Игрок 1
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -77,8 +94,18 @@ def fight_board_loop(fight_board_one, fight_board_two):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Левый клик мыши (выстрел)
                     mouse_pos = pygame.mouse.get_pos()
-                    fight_board_one.get_click(mouse_pos)
-                    fight_board_two.get_click(mouse_pos)
+                    if current_player == 1:
+                        fight_board_two.get_click(mouse_pos, current_player)
+                    else:
+                        fight_board_one.get_click(mouse_pos, current_player)
+
+                    # Проверка на победу
+                    winner = fight_board_two.check_win() if current_player == 1 else fight_board_one.check_win()
+                    if winner:
+                        return winner  # Возвращаем номер победителя
+
+                    # Смена игрока
+                    current_player = 3 - current_player  # Переключаем между 1 и 2
 
         screen.fill('white')
         fight_board_one.render(screen)
