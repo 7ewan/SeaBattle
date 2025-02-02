@@ -11,8 +11,11 @@ class Board:
         self.cell_size = cell_size
         self.text_color = text_color
         self.font = pygame.font.SysFont(None, 24)
+        self.warning_message = ""
 
     def render(self, screen):
+        warning_text = self.font.render(self.warning_message, True, 'red')
+        screen.blit(warning_text, (self.left, self.top + self.height * self.cell_size + 10))
         pygame.draw.rect(screen, 'black',
                          (self.left, self.top, self.cell_size * self.width, self.cell_size * self.height), 3)
 
@@ -102,3 +105,9 @@ class Board:
         with open(file_name, 'w') as f:
             for row in self.board:
                 f.write(" ".join(map(str, row)) + '\n')
+
+    def set_warning_message(self, message):
+        self.warning_message = message
+
+    def clear_warning_message(self):
+        self.warning_message = ""

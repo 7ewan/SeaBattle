@@ -63,7 +63,7 @@ def show_finish_window(winner):
     # Кнопка "Начать заново"
     button_font = pygame.font.SysFont(None, 32)
     button_text = button_font.render("Начать заново", True, (255, 255, 255))
-    button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 50, 200, 50)
+    button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 50, 180, 50)
 
     # Очищаем группу спрайтов перед созданием нового анимированного спрайта
     all_sprites.empty()

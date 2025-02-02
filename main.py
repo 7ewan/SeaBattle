@@ -4,12 +4,10 @@ from Boards import Board
 from Ships import Ship
 from FightBoard import FightBoard, fight_board_loop
 
-
 pygame.init()
 
-# Функция для сброса состояния игры
+
 def reset_game():
-    # Создаем новые объекты для игровых досок и кораблей
     board_player_one = Board(10, 10, 40, 100, 40)
     board_player_two = Board(10, 10, 40, 100, 40)
 
@@ -27,11 +25,9 @@ def reset_game():
     ships_1 = [ship1_1, ship1_2, ship1_3, ship1_4, ship2_1, ship2_2, ship2_3, ship3_1, ship3_2, ship4]
     ships_2 = [ship1_1, ship1_2, ship1_3, ship1_4, ship2_1, ship2_2, ship2_3, ship3_1, ship3_2, ship4]
 
-    # Сбрасываем состояние досок
     board_player_one.reset_board("board_state_1.txt")
     board_player_two.reset_board("board_state_2.txt")
 
-    # Возвращаем все корабли на стартовые позиции
     for ship in ships_1 + ships_2:
         ship.reset_position()
 
@@ -39,8 +35,7 @@ def reset_game():
 
 
 def main_game_loop():
-    while True:  # Бесконечный цикл для перезапуска игры
-        # Сбрасываем все состояния игры
+    while True:
         board_player_one, board_player_two, ships_1, ships_2 = reset_game()
 
         start_screen()
@@ -91,13 +86,13 @@ def main_game_loop():
                                 board_player_two.reset_board("board_state_2.txt")
                                 board_player_two.print_board()
                             else:
-                                print("Сначала расставьте все корабли для первого игрока!")
+                                board.set_warning_message("Не спеши матрос! Не весь флот готов к бою")
 
                         elif fight_button_rect.collidepoint(mouse_pos) and placing_player_two:
                             if all(board_player_two.is_ship_on_board(ship) for ship in ships_2):
                                 fight_mode = True
                             else:
-                                print("Не все корабли расставлены! Расставьте все корабли перед началом боя.")
+                                board.set_warning_message("Не спеши матрос! Не весь флот готов к бою")
 
                         for ship in ships:
                             if ship.rect.collidepoint(mouse_pos):
@@ -114,24 +109,22 @@ def main_game_loop():
                                 board.remove_ship(ship)
 
                                 if ship.orientation == "horizontal":
-                                    new_x = ship.rect.x
                                     new_y = ship.rect.y - (ship.size - 1) * ship.cell_size
                                     if new_y < board.top:
-                                        print("Не хватает места для поворота! Отмена поворота.")
+                                        board.set_warning_message("Куда собрался? Таким манёвром ты покинешь поле боя")
                                         board.place_ship(ship)
                                         continue
                                 elif ship.orientation == "vertical":
                                     new_x = ship.rect.x + (ship.size - 1) * ship.cell_size
-                                    new_y = ship.rect.y
                                     if new_x > board.left + board.width * board.cell_size:
-                                        print("Не хватает места для поворота! Отмена поворота.")
+                                        board.set_warning_message("Куда собрался? Таким манёвром ты покинешь поле боя")
                                         board.place_ship(ship)
                                         continue
 
                                 ship.rotate()
 
                                 if ship.check_adjacent_ships(ships, board):
-                                    print("Корабль слишком близко к другому! Отмена поворота.")
+                                    board.set_warning_message("Спокойно салага, таким разворот заденешь товарища!")
                                     ship.rotate()
                                     ship.rect.x, ship.rect.y = previous_position
                                     board.place_ship(ship)
@@ -139,6 +132,7 @@ def main_game_loop():
 
                                 board.place_ship(ship)
                                 board.save_board_to_file(board_state_file)
+                                board.clear_warning_message()
                                 board.print_board()
                                 break
 
@@ -176,14 +170,15 @@ def main_game_loop():
                                 dragging.rect.x, dragging.rect.y = dragging.initial_position
                                 board.remove_ship(dragging)
                                 board.print_board()
+                                board.set_warning_message("Юнга, не стоит ставить корабли так близко!")
                             else:
                                 board.place_ship(dragging)
                                 board.print_board()
+                                board.clear_warning_message()
                                 board.save_board_to_file(board_state_file)
 
                         dragging = None
 
-            # **Запуск боя**
             if fight_mode:
                 running = False
                 fight_board_one = FightBoard(10, 10, 40, 100, 40)
@@ -191,15 +186,14 @@ def main_game_loop():
                 fight_board_one.load_board_state("board_state_1.txt")
                 fight_board_two.load_board_state("board_state_2.txt")
                 fight_result = fight_board_loop(fight_board_one, fight_board_two)
-                if fight_result:  # Если игрок нажал "Начать заново"
-                    break  # Выходим из внутреннего цикла и начинаем игру заново
+                if fight_result:
+                    break
                 else:
-                    terminate()  # Завершаем игру
+                    terminate()
 
             screen.fill("white")
             board.render(screen)
 
-            # Отображаем корабли только текущего игрока
             if not placing_player_two:
                 for ship in ships_1:
                     screen.blit(ship.image, ship.rect)
@@ -224,5 +218,5 @@ def main_game_loop():
             pygame.display.flip()
             clock.tick(FPS)
 
-# Запуск игры
+
 main_game_loop()

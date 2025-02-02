@@ -17,7 +17,7 @@ pygame.init()
 
 def start_screen():
     intro_text = ["МОРСКОЙ БОЙ",
-                  'НАЖМИТЕ "SPACE" ДЛЯ НАЧАЛА ИГРЫ', ]
+                  'НАЖМИТЕ "ЛКМ" ДЛЯ НАЧАЛА ИГРЫ', ]
 
     fon = pygame.transform.scale(load_image('banner5.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
@@ -35,8 +35,8 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
                     return  # начинаем игру
         pygame.display.flip()
         clock.tick(FPS)

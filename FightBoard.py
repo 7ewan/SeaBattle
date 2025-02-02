@@ -13,11 +13,11 @@ FPS = 60
 class FightBoard(Board):
     def __init__(self, width, height, left, top, cell_size, text_color='black'):
         super().__init__(width, height, left, top, cell_size, text_color)
-        self.hits = [['0'] * width for _ in range(height)]  # 0 - не атакована, 'X' - попадание, 'x' - промах
+        self.hits = [['0'] * width for _ in range(height)]
         self.font = pygame.font.SysFont(None, 32)
-        self.timer_font = pygame.font.SysFont(None, 48)  # Шрифт для таймера
-        self.player1_hits = 0  # Счетчик попаданий Игрока 1
-        self.player2_hits = 0  # Счетчик попаданий Игрока 2
+        self.timer_font = pygame.font.SysFont(None, 36)
+        self.player1_hits = 0
+        self.player2_hits = 0
 
     def load_board_state(self, file_name):
         try:
@@ -57,9 +57,10 @@ class FightBoard(Board):
         if hit:
             self.hits[y][x] = 'X'
             if player == 1:
-                self.player1_hits += 1  # Увеличиваем счетчик попаданий Игрока 1
+                self.player1_hits += 1
             else:
-                self.player2_hits += 1  # Увеличиваем счетчик попаданий Игрока 2
+                self.player2_hits += 1
+            self.mark_destroyed_ship(x, y)
         else:
             self.hits[y][x] = 'x'
 
@@ -85,6 +86,22 @@ class FightBoard(Board):
         cell = self.get_cell(mouse_pos)
         return self.on_click(cell, player)
 
+    def mark_destroyed_ship(self, x, y):
+        ship_id = self.board[y][x]
+        ship_cells = []
+        for row in range(self.height):
+            for col in range(self.width):
+                if self.board[row][col] == ship_id:
+                    ship_cells.append((col, row))
+        if all(self.hits[cy][cx] == 'X' for cx, cy in ship_cells):
+            directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+            for cx, cy in ship_cells:
+                for dx, dy in directions:
+                    nx, ny = cx + dx, cy + dy
+                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                        if self.board[ny][nx] == 0 and self.hits[ny][nx] == '0':  # Если пустая клетка
+                            self.hits[ny][nx] = 'x'
+
     def check_win(self):
         if self.player1_hits >= 20:
             return 1  # Победил Игрок 1
@@ -95,7 +112,7 @@ class FightBoard(Board):
 
 def fight_board_loop(fight_board_one, fight_board_two):
     running = True
-    current_player = 1  # Начинает Игрок 1
+    current_player = 1
     turn_start_time = pygame.time.get_ticks()
     turn_duration = 30000
 
@@ -103,7 +120,6 @@ def fight_board_loop(fight_board_one, fight_board_two):
         current_time = pygame.time.get_ticks()
         elapsed_time = current_time - turn_start_time
 
-        # Если время истекло, передаем ход другому игроку
         if elapsed_time >= turn_duration:
             print(f"Время вышло! Ход переходит к Игроку {3 - current_player}.")
             current_player = 3 - current_player
@@ -154,9 +170,18 @@ def fight_board_loop(fight_board_one, fight_board_two):
                                     turn_start_time = pygame.time.get_ticks()
 
         screen.fill('white')
+        font = pygame.font.SysFont(None, 36)
+        player1_text = font.render("Игрок 1", True, ('blue'))
+        player2_text = font.render("Игрок 2", True, ('red'))
+
+        screen.blit(player1_text, (
+        fight_board_one.left + fight_board_one.width * fight_board_one.cell_size // 2 - 40, fight_board_one.top - 80))
+        screen.blit(player2_text, (
+        fight_board_two.left + fight_board_two.width * fight_board_two.cell_size // 2 - 40, fight_board_two.top - 80))
+
         fight_board_one.render(screen)
         fight_board_two.render(screen)
-        turn_text = pygame.font.SysFont(None, 48).render(f"Ход игрока {current_player}", True, 'black')
+        turn_text = pygame.font.SysFont(None, 32).render(f"Ход игрока {current_player}", True, 'black')
         screen.blit(turn_text, (WIDTH // 2 - 100, 20))
         remaining_time = max(0, turn_duration - elapsed_time)
         timer_text = fight_board_one.timer_font.render(f"Осталось: {remaining_time // 1000} сек", True, (0, 0, 0))
