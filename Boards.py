@@ -57,15 +57,26 @@ class Board:
         self.on_click(cell)
 
     def place_ship(self, ship):
-        cell_x = (ship.rect.x - self.left) // self.cell_size
-        cell_y = (ship.rect.y - self.top) // self.cell_size
-
+        cell = self.get_cell((ship.rect.x, ship.rect.y))
+        if cell is None:
+            print("Ошибка: Корабль не может быть размещен за пределами доски!")
+            return False
+        cell_x, cell_y = cell
         if ship.orientation == "horizontal":
-            for i in range(ship.size):
-                self.board[cell_y][cell_x + i] = ship.ship_id
+            if cell_x + ship.size > self.width:
+                print("Ошибка: Корабль выходит за границы поля!")
+                return False
         else:
-            for i in range(ship.size):
+            if cell_y + ship.size > self.height:
+                print("Ошибка: Корабль выходит за границы поля!")
+                return False
+
+        for i in range(ship.size):
+            if ship.orientation == "horizontal":
+                self.board[cell_y][cell_x + i] = ship.ship_id
+            else:
                 self.board[cell_y + i][cell_x] = ship.ship_id
+        return True
 
     def remove_ship(self, ship):
         for y in range(self.height):
