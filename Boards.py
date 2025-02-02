@@ -62,16 +62,13 @@ class Board:
     def place_ship(self, ship):
         cell = self.get_cell((ship.rect.x, ship.rect.y))
         if cell is None:
-            print("Ошибка: Корабль не может быть размещен за пределами доски!")
             return False
         cell_x, cell_y = cell
         if ship.orientation == "horizontal":
             if cell_x + ship.size > self.width:
-                print("Ошибка: Корабль выходит за границы поля!")
                 return False
         else:
             if cell_y + ship.size > self.height:
-                print("Ошибка: Корабль выходит за границы поля!")
                 return False
 
         for i in range(ship.size):
