@@ -103,9 +103,9 @@ class FightBoard(Board):
                             self.hits[ny][nx] = 'x'
 
     def check_win(self):
-        if self.player1_hits >= 20:
+        if self.player1_hits == 20:
             return 1  # Победил Игрок 1
-        elif self.player2_hits >= 20:
+        elif self.player2_hits == 20:
             return 2  # Победил Игрок 2
         return 0  # Победителя пока нет
 

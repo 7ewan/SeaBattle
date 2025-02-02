@@ -115,7 +115,7 @@ def main_game_loop():
                                         board.place_ship(ship)
                                         continue
                                 elif ship.orientation == "vertical":
-                                    new_x = ship.rect.x + (ship.size - 1) * ship.cell_size
+                                    new_x = ship.rect.x + ship.size * ship.cell_size
                                     if new_x > board.left + board.width * board.cell_size:
                                         board.set_warning_message("Куда собрался? Таким манёвром ты покинешь поле боя")
                                         board.place_ship(ship)
